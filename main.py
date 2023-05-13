@@ -1,20 +1,15 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from data import readDatabase
-from pydantic import BaseModel
 from mlforecast import MLForecast
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Lasso
 
 import numpy as np
 
-
-class Dayprediction(BaseModel):
-    """Pydantic model representing the request body for the prediction endpoint."""
-    day : int
-
 app = FastAPI()
 
-@app.post('/prediction')
-def predictionDays(day : Dayprediction):
+@app.get("/prediction/{predday}/")
+def predictionDays(predday : int):
     """
     Endpoint for predicting sales for a given day using machine learning.
 
@@ -29,7 +24,7 @@ def predictionDays(day : Dayprediction):
     train["unique_id"] = np.repeat(0, train.shape[0])
     
     # Initialize linear regression model.
-    model = LinearRegression(fit_intercept=False)
+    model = Lasso(fit_intercept=False)
     
     # Initialize MLForecast object with model, frequency, and lags.
     forecast = MLForecast(
@@ -42,8 +37,13 @@ def predictionDays(day : Dayprediction):
     forecast.fit(train)
     
     # Predict sales for the input day.
-    prediction = forecast.predict(day.day)
+    prediction = forecast.predict(predday)
+    
+    # Procesing the dataframe for the output
+    prediction["ds"] = prediction["ds"].astype(str)
+    prediction = prediction.drop(['unique_id'], axis=1)
+    prediction = prediction.rename(columns = {'ds' : 'Day predicted',
+                                              'Lasso' : 'Sales Prediction'})
     
     # Return a dictionary containing the predicted day and sales.
-    return {"Day predicted" : f"{prediction['ds']}",
-            "Sale prediction" : f"{prediction['LinearRegression']}"}
+    return JSONResponse(content = prediction.to_dict())

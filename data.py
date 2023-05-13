@@ -1,11 +1,10 @@
 from constants import DATABASE
+
 import pandas as pd
 import os
 
-
 # get the list of files from the database directory
 files = os.listdir(DATABASE)
-
 
 def readDatabase(file=files) -> pd.DataFrame:
     """Reads sales data from the database directory.

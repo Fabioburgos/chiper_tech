@@ -8,13 +8,18 @@ This API was created within the recruitment process for Chiper.
 #### Make the prediction
 
 ```http
-  GET /prediction
+  GET /prediction/{preddays}
 ```
 
 | Parameter | Type     | Description                |
 | :-------- | :------- | :------------------------- |
-| `forecast days` | `integer` | **Required**. The days you want to forecast |
+| `preddays` | `integer` | **Required**. The days you want to forecast |
 
+To make the prediction you must put in the address bar of your browser the next url: http://127.0.0.1:8000/prediction/{preddays}; you must change the word "preddays" to the number of days you want to forecast.
+
+After you press enter, the API will run the prediction model and show you the predictions as follows:
+
+![App Screenshot]("https://i.ibb.co/1Gm1Sqs/Untitled.png")
 
 ## Installation
 
