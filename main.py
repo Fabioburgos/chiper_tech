@@ -8,6 +8,10 @@ import numpy as np
 
 app = FastAPI()
 
+@app.get("/")
+def mainPage():
+    return {"message": "To make predictions go to the endpoint: http:127.0.0.1/prediction/{predday}"}
+
 @app.get("/prediction/{predday}/")
 def predictionDays(predday : int):
     """
