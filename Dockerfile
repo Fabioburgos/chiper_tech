@@ -10,8 +10,6 @@ COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-ENV PORT 8080
-
 # Copy the application code into the container
 # COPY ["main.py", "constants.py", "data.py", "db", "./"] .
 COPY . .
