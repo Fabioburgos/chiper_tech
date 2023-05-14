@@ -1,31 +1,53 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from data import readDatabase
-from sklearn.linear_model import LinearRegression
-import numpy as np
-from pydantic import BaseModel
 from mlforecast import MLForecast
+from sklearn.linear_model import Lasso
 
-class Dayprediction(BaseModel):
-    day : int
+import numpy as np
 
 app = FastAPI()
 
-@app.post('/prediction')
-def predictionDays(day : Dayprediction):
+@app.get("/")
+def mainPage():
+    return {"message": "To make predictions go to the endpoint: http:127.0.0.1/prediction/{predday}"}
 
+@app.get("/prediction/{predday}/")
+def predictionDays(predday : int):
+    """
+    Endpoint for predicting sales for a given day using machine learning.
+
+    Args:
+        day (Dayprediction): The input day to predict sales for.
+
+    Returns:
+        A dictionary containing the predicted day and sales.
+    """
+    # Read training data and add unique identifier.
     train = readDatabase().reset_index()[['ds', 'y']]
     train["unique_id"] = np.repeat(0, train.shape[0])
     
-    model = LinearRegression(fit_intercept=False)
+    # Initialize linear regression model.
+    model = Lasso(fit_intercept=False)
     
+    # Initialize MLForecast object with model, frequency, and lags.
     forecast = MLForecast(
         models = model,
         freq = "D",
         lags = [7, 14, 30]
     )
     
+    # Fit model to training data.
     forecast.fit(train)
-    prediction = forecast.predict(day.day)
     
-    return {"Day predicted" : f"{prediction['ds']}",
-            "sale prediction" : f"{prediction['LinearRegression']}"}
+    # Predict sales for the input day.
+    prediction = forecast.predict(predday)
+    
+    # Procesing the dataframe for the output
+    prediction["ds"] = prediction["ds"].astype(str)
+    prediction = prediction.drop(['unique_id'], axis=1)
+    prediction = prediction.rename(columns = {'ds' : 'Day predicted',
+                                              'Lasso' : 'Sales Prediction'})
+    
+    # Return a dictionary containing the predicted day and sales.
+    return JSONResponse(content = prediction.to_dict())

@@ -11,7 +11,7 @@ def test_post_endpoint():
     payload = {
         "day": 7
         }
-    response = requests.post(ENDPOINT + '/prediction', json = payload)
+    response = requests.post(ENDPOINT + '/prediction/{payload}', json = payload)
     assert response.status_code == 200
     
     data = response.json()
