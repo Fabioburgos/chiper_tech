@@ -8,10 +8,8 @@ def test_call_endpoint():
     pass
 
 def test_post_endpoint():
-    payload = {
-        "day": 7
-        }
-    response = requests.post(ENDPOINT + '/prediction/{payload}', json = payload)
+
+    response = requests.get(ENDPOINT + 'prediction/7')
     assert response.status_code == 200
     
     data = response.json()
